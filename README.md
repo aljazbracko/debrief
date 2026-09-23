@@ -4,16 +4,16 @@
 <p align="center">Manifest V3 · Vanilla JavaScript · No dependencies · No requested permissions · Graphite UI</p>
 <p align="center"><a href="#install">Install</a> · <a href="#use">Use</a> · <a href="SECURITY.md">Security</a> · <a href="PRIVACY.md">Privacy</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
 
-![Debrief showing synthetic API requests and a redacted response](docs/images/preview.png)
+![Debrief showing synthetic API requests and a redacted response](docs/images/preview.png?v=1.3.1)
 
 *The real extension UI, populated with fictional `example.test` requests. No customer or production captures are used.*
 
 <details>
 <summary>More previews: Markdown output and docked DevTools</summary>
 
-![The exact redacted Markdown preview](docs/images/markdown.png)
+![The exact redacted Markdown preview](docs/images/markdown.png?v=1.3.1)
 
-![The request inspector in a narrower docked layout](docs/images/docked.png)
+![The request inspector in a narrower docked layout](docs/images/docked.png?v=1.3.1)
 
 </details>
 

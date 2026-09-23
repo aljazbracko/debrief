@@ -2,47 +2,60 @@
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Debrief</title><link rel="stylesheet" href="panel.css"></head>
 <body>
-  <header>
-    <div class="identity"><span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="26" height="26"><path d="M7 5.5h12.2L25 11.2V26.5H7V5.5Z"/><path d="M19 5.6V11h6"/><path d="M11 16.8h7.4M15.2 13.8 18.4 16.8 15.2 19.8"/></svg></span><div><h1>Debrief <span class="version" id="version">1.3.1</span></h1><p>One request. The whole story.</p></div></div>
-    <div class="privacy"><span class="dot"></span> LOCAL ONLY <span class="divider">/</span> MEMORY ONLY</div>
-  </header>
-  <section class="toolbar" aria-label="Request controls">
-    <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Filter requests… e.g. orders -analytics" aria-label="Filter requests; use a minus sign to exclude a term"></label>
-    <label class="capture-mode" title="HTTP only disables page storage, console and Pusher sampling. Changing mode clears captured data."><input id="http-only" type="checkbox"> HTTP only</label>
-    <button id="pause" type="button">Pause</button><button id="clear" type="button">Clear</button>
-  </section>
-  <section class="filter-bar" aria-label="Request filters">
-    <div id="type-filters" class="type-filters" role="group" aria-label="Request type"></div>
-    <div class="filter-options">
-      <label>Method <select id="method-filter"><option value="all">All methods</option><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>OPTIONS</option><option>HEAD</option></select></label>
-      <label>Status <select id="status-filter"><option value="all">All statuses</option><option value="failed">Failed (0 / 4xx / 5xx)</option><option value="2xx">2xx success</option><option value="3xx">3xx redirects</option><option value="4xx">4xx client errors</option><option value="5xx">5xx server errors</option><option value="network">Network errors (0)</option></select></label>
-      <label>Host <select id="host-filter"><option value="all">All hosts</option></select></label>
-      <button id="reset-filters" class="quiet">Reset filters</button>
+  <header class="app-header">
+    <div class="identity"><span class="mark" aria-hidden="true"><svg viewBox="0 0 32 32" width="22" height="22"><path d="M7 5.5h12.2L25 11.2V26.5H7V5.5Z"/><path d="M19 5.6V11h6"/><path d="M11 16.8h7.4M15.2 13.8 18.4 16.8 15.2 19.8"/></svg></span><h1>Debrief <span class="version" id="version">1.4.0</span></h1></div>
+    <div class="header-tools">
+      <label class="capture-mode" title="HTTP only disables page storage, console and Pusher sampling. Changing mode clears captured data."><input id="http-only" type="checkbox" checked> HTTP only</label>
+      <button id="pause" type="button">Pause</button>
+      <button id="clear" type="button">Clear</button>
     </div>
-  </section>
-  <div class="capture-line"><span id="capture-state">Connecting to DevTools…</span><span id="count">0 requests</span></div>
+  </header>
+  <nav class="app-nav" id="app-nav" aria-label="Debrief sections">
+    <button type="button" data-view="brief" aria-pressed="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M7 3h7l4 4v14H4V3h3Z"/><path d="M14 3v5h4M8 12h6M8 16h4"/></svg>Brief<span class="nav-count" id="count-brief">0</span></button>
+    <button type="button" data-view="requests" class="active" aria-pressed="true"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 7h13l-3-3M20 17H7l3 3M17 7l-3 3M7 17l3-3"/></svg>Requests<span class="nav-count" id="count-requests">0</span></button>
+    <button type="button" data-view="state" aria-pressed="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 12l9 5 9-5M3 16l9 5 9-5"/></svg>App state<span class="nav-count" id="count-state">0</span></button>
+    <button type="button" data-view="connections" aria-pressed="false"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path d="M4 16v4M9 12v8M14 8v12M19 4v16"/></svg>Connections<span class="connection-dot" id="connection-dot" title="No exposed connection"></span></button>
+  </nav>
   <main>
-    <section class="requests" aria-label="Captured requests">
-      <div id="socket-summary" class="socket-summary" hidden></div>
-      <div class="list-heading"><span>STATUS / METHOD</span><span>REQUEST / TYPE</span><span>TIME</span><span class="copy-heading"><span class="sr-only">Copy</span></span></div>
-      <div id="request-list"></div>
-      <div id="empty" class="empty"><div class="empty-symbol" aria-hidden="true">[ → ]</div><h2>Catch the next bug.</h2><p id="empty-description">Keep DevTools open and use your app.</p><button id="show-all" class="quiet" hidden>Show all request types</button></div>
-    </section>
-    <div id="split" class="split" role="separator" aria-orientation="horizontal" aria-label="Resize request list" aria-valuemin="112" aria-valuenow="240" tabindex="0" title="Drag to resize. Double-click to reset."></div>
-    <aside aria-label="Request inspector">
-      <div class="preview-heading"><div class="preview-titles"><div class="eyebrow">INSPECTOR</div><h2 id="preview-title">Ready when you are.</h2></div><div class="preview-tools"><button id="copy-selected" class="icon-btn primary" type="button" disabled aria-label="Copy redacted context" title="Copy redacted context"><svg class="icon-copy" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="4" y="3.25" width="8" height="10.25" rx="1.25"/><path d="M6.15 3.25V2.7c0-.4.32-.7.72-.7h2.26c.4 0 .72.3.72.7v.55"/><path d="M6.3 8.1h3.4M6.3 10.15h2.2"/></svg><svg class="icon-check" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M3.2 8.4 6.5 11.5 12.8 4.6"/></svg></button><button id="copy-raw" class="icon-btn raw" type="button" disabled aria-label="Copy raw, unredacted" title="Copy raw, unredacted…"><svg class="icon-raw" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="3.2" y="3.25" width="8" height="10.25" rx="1.25" stroke-dasharray="2.1 1.45"/><path d="M5.35 3.25V2.7c0-.4.32-.7.72-.7h2.26c.4 0 .72.3.72.7v.55"/><path d="M12.15 3.1v3.15M12.15 7.85h.01"/></svg><svg class="icon-check" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M3.2 8.4 6.5 11.5 12.8 4.6"/></svg></button><span class="badge">REDACTED</span></div></div>
-      <p id="preview-meta" class="muted">Select a request to inspect exactly what the safe copy includes.</p>
-      <div id="detail-tabs" class="detail-tabs" role="tablist" aria-label="Request details">
-        <button id="tab-headers" role="tab" data-tab="headers" aria-selected="true" aria-controls="inspector">Headers</button>
-        <button id="tab-payload" role="tab" data-tab="payload" aria-selected="false" tabindex="-1" aria-controls="inspector">Payload</button>
-        <button id="tab-response" role="tab" data-tab="response" aria-selected="false" tabindex="-1" aria-controls="inspector">Response</button>
-        <button id="tab-timing" role="tab" data-tab="timing" aria-selected="false" tabindex="-1" aria-controls="inspector">Timing</button>
-        <button id="tab-errors" role="tab" data-tab="errors" aria-selected="false" tabindex="-1" aria-controls="inspector">Errors</button>
-        <button id="tab-auth" role="tab" data-tab="auth" aria-selected="false" tabindex="-1" aria-controls="inspector">Auth / Pusher</button>
-        <button id="tab-context" role="tab" data-tab="context" aria-selected="false" tabindex="-1" aria-controls="preview">LLM context</button>
+    <section id="view-requests" class="view">
+      <section class="toolbar" aria-label="Request controls">
+        <div id="type-filters" class="type-filters" role="group" aria-label="Request type"></div>
+        <label class="search"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Filter path, host, status…" aria-label="Filter requests; use a minus sign to exclude a term"></label>
+      </section>
+      <section class="filter-bar" aria-label="Request filters">
+        <div class="filter-options">
+          <label>Method <select id="method-filter"><option value="all">All methods</option><option>GET</option><option>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>OPTIONS</option><option>HEAD</option></select></label>
+          <label>Status <select id="status-filter"><option value="all">All statuses</option><option value="failed">Failed (0 / 4xx / 5xx)</option><option value="2xx">2xx success</option><option value="3xx">3xx redirects</option><option value="4xx">4xx client errors</option><option value="5xx">5xx server errors</option><option value="network">Network errors (0)</option></select></label>
+          <label>Host <select id="host-filter"><option value="all">All hosts</option></select></label>
+          <button id="reset-filters" class="quiet" type="button">Reset filters</button>
+        </div>
+      </section>
+      <div class="capture-line"><span id="capture-state">Connecting to DevTools…</span><span id="count">0 requests</span></div>
+      <div id="workbench">
+        <section class="requests" aria-label="Captured requests">
+          <div class="list-heading"><span>STATUS</span><span>METHOD</span><span>PATH</span><span class="col-host">HOST</span><span>TIME</span><span class="copy-heading"><span class="sr-only">Copy</span></span></div>
+          <div id="request-list"></div>
+          <div id="empty" class="empty"><h2>Waiting for requests.</h2><p id="empty-description">Keep DevTools open and use your app.</p><button id="show-all" class="quiet" type="button" hidden>Show all request types</button></div>
+        </section>
+        <div id="split" class="split" role="separator" aria-orientation="horizontal" aria-label="Resize request list" aria-valuemin="112" aria-valuenow="240" tabindex="0" title="Drag to resize. Double-click to reset."></div>
+        <aside aria-label="Request inspector">
+          <div class="preview-heading"><div class="preview-titles"><div class="eyebrow">INSPECTOR</div><h2 id="inspector-title">Ready when you are.</h2></div></div>
+          <p id="inspector-meta" class="muted">Select a request. The footer copies its full redacted brief.</p>
+          <div id="detail-tabs" class="detail-tabs" role="tablist" aria-label="Request details">
+            <button id="tab-headers" type="button" role="tab" data-tab="headers" aria-selected="true" aria-controls="inspector">Headers</button>
+            <button id="tab-payload" type="button" role="tab" data-tab="payload" aria-selected="false" tabindex="-1" aria-controls="inspector">Payload</button>
+            <button id="tab-response" type="button" role="tab" data-tab="response" aria-selected="false" tabindex="-1" aria-controls="inspector">Response</button>
+            <button id="tab-timing" type="button" role="tab" data-tab="timing" aria-selected="false" tabindex="-1" aria-controls="inspector">Timing</button>
+            <button id="tab-errors" type="button" role="tab" data-tab="errors" aria-selected="false" tabindex="-1" aria-controls="inspector">Errors</button>
+            <button id="tab-auth" type="button" role="tab" data-tab="auth" aria-selected="false" tabindex="-1" aria-controls="inspector">Auth / Pusher</button>
+          </div>
+          <div id="inspector" role="tabpanel" aria-labelledby="tab-headers" tabindex="0"><p class="inspector-empty">Select a request to inspect headers, payload and response.</p></div>
+        </aside>
       </div>
-      <div id="inspector" role="tabpanel" aria-labelledby="tab-headers" tabindex="0"><p class="inspector-empty">Select a request to inspect headers, payload and response.<br><br>The copy icon always copies the full Markdown report, whichever tab is open.</p></div>
-      <pre id="preview" role="tabpanel" aria-labelledby="tab-context" tabindex="0" hidden>The useful details, together:
+    </section>
+    <section id="view-brief" class="view" hidden>
+      <div class="brief-heading"><div class="eyebrow">SELECTED REQUEST</div><h2 id="preview-title">Ready when you are.</h2><p id="preview-meta" class="muted">Select a request on the Requests tab. This is the exact redacted brief the footer copies.</p></div>
+      <pre id="preview" tabindex="0">The useful details, together:
 
 → Request + response
 → Headers + payload
@@ -52,10 +65,20 @@
 
 Credentials and common personal data are
 redacted before the output is shortened.</pre>
-    </aside>
+    </section>
+    <section id="view-state" class="view" hidden>
+      <div class="view-toolbar"><p id="state-intro" class="muted view-intro"></p><button id="copy-state" class="quiet" type="button" disabled>Copy state</button></div>
+      <div id="state-body"></div>
+    </section>
+    <section id="view-connections" class="view" hidden>
+      <div id="socket-summary" class="socket-summary"></div>
+      <h3 class="section-label">Socket handshakes</h3>
+      <div id="handshake-list"></div>
+    </section>
   </main>
-  <footer><span id="notice" role="status" aria-live="polite">Redaction is always on. Raw copy requires confirmation each time.</span><span class="footer-label">NO UPLOAD. JUST COPY.</span></footer>
+  <footer class="copy-bar"><span id="notice" role="status" aria-live="polite">Redaction is always on. Raw copy requires confirmation each time.</span><div class="footer-actions"><span class="badge">REDACTED</span><button id="copy-raw" class="icon-btn raw" type="button" disabled aria-label="Copy raw, unredacted" title="Copy raw, unredacted…"><svg class="icon-raw" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="3.2" y="3.25" width="8" height="10.25" rx="1.25" stroke-dasharray="2.1 1.45"/><path d="M5.35 3.25V2.7c0-.4.32-.7.72-.7h2.26c.4 0 .72.3.72.7v.55"/><path d="M12.15 3.1v3.15M12.15 7.85h.01"/></svg><svg class="icon-check" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M3.2 8.4 6.5 11.5 12.8 4.6"/></svg></button><button id="copy-selected" class="copy-brief" type="button" disabled aria-label="Copy redacted brief" title="Copy redacted brief"><svg class="icon-copy" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><rect x="4" y="3.25" width="8" height="10.25" rx="1.25"/><path d="M6.15 3.25V2.7c0-.4.32-.7.72-.7h2.26c.4 0 .72.3.72.7v.55"/><path d="M6.3 8.1h3.4M6.3 10.15h2.2"/></svg><svg class="icon-check" viewBox="0 0 16 16" width="15" height="15" aria-hidden="true"><path d="M3.2 8.4 6.5 11.5 12.8 4.6"/></svg>Copy brief</button></div></footer>
   <dialog id="raw-dialog"><form method="dialog"><div class="eyebrow danger">UNREDACTED COPY</div><h2>This copy can contain secrets.</h2><p>Tokens, cookies and personal data will go to your clipboard. The next normal copy will still be redacted.</p><label class="check"><input id="raw-ack" type="checkbox"> I intend to copy credentials for this request.</label><div class="dialog-actions"><button value="cancel">Cancel</button><button id="raw-confirm" class="danger-button" type="button" disabled>Copy raw context</button></div></form></dialog>
   <dialog id="clipboard-dialog"><h2>Copy with your keyboard</h2><p>Chrome blocked automatic clipboard access. The text below is selected: press ⌘C or Ctrl+C.</p><textarea id="manual-copy" readonly aria-label="Context to copy manually"></textarea><form method="dialog"><button>Done</button></form></dialog>
   <script type="module" src="panel.js"></script>
-</body></html>
+</body>
+</html>

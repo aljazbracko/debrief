@@ -171,8 +171,6 @@ body.is-resizing, body.is-resizing * { cursor: row-resize; user-select: none; }
   .detail-tabs button[data-tab=context] { margin-left: 0; }
 }
 @media (max-width: 560px) {
-  .duration, .list-heading span:nth-child(3) { display: none; }
-  .list-heading, .request-row { grid-template-columns: 92px minmax(0, 1fr) 34px; }
   .privacy { display: none; }
   .toolbar { flex-wrap: wrap; }
   .toolbar .search { flex: 1 1 100%; max-width: none; }
@@ -278,3 +276,70 @@ dialog p { color: var(--muted); }
 textarea { background: var(--surface-inset); color: var(--ink); border-color: var(--border); }
 .danger { color: var(--danger); }
 .danger-button { background: var(--danger-bg); border-color: #65464b; color: var(--danger); }
+
+/* Consolidated sections. Request rows stay one line so a docked panel shows more of them. */
+.app-header { padding: 8px 14px; min-height: 0; gap: 12px; }
+.app-header h1 { margin: 0; font-size: 16px; }
+.header-tools { display: flex; align-items: center; gap: 8px; flex: none; }
+.header-tools button { padding: 5px 9px; }
+.app-nav { display: flex; align-items: center; gap: 4px; padding: 6px 10px; background: var(--surface); border-bottom: 1px solid var(--border); overflow-x: auto; }
+.app-nav button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: transparent; color: var(--muted); border-radius: 6px; padding: 6px 8px; font-size: 12px; }
+.app-nav button:hover:not(:disabled) { background: var(--surface-raised); color: var(--ink); }
+.app-nav button.active { color: var(--ink); background: var(--surface-raised); }
+.app-nav svg, .app-nav svg * { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.nav-count { font: 10px/1.4 ui-monospace, "SFMono-Regular", Consolas, monospace; color: var(--dim); background: var(--surface-inset); border-radius: 99px; min-width: 16px; padding: 0 5px; text-align: center; }
+.app-nav button.active .nav-count { color: var(--ink); }
+.connection-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border-strong); box-shadow: none; }
+.connection-dot.live { background: var(--success); }
+main { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+#view-requests:not([hidden]) { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+#view-brief[hidden], #view-state[hidden], #view-connections[hidden], #view-requests[hidden] { display: none !important; }
+#view-brief:not([hidden]), #view-state:not([hidden]), #view-connections:not([hidden]) { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: auto; padding: 14px 16px 18px; }
+.toolbar { align-items: center; flex-wrap: wrap; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+.request-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.toolbar .search { flex: 1 1 160px; max-width: 320px; margin-left: auto; }
+.type-filters { flex: 1 1 auto; margin: 0; }
+#workbench { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+.requests { flex: 0 1 auto; max-height: var(--list-h, 46%); min-height: 72px; overflow: auto; }
+#workbench aside { flex: 1 1 auto; min-height: 0; overflow: auto; }
+.list-heading, .request-row { display: grid; grid-template-columns: 46px 58px minmax(0, 1fr) minmax(88px, 168px) 62px 26px; gap: 8px; align-items: center; height: 34px; min-height: 34px; max-height: 34px; padding: 0 8px; }
+.list-heading { position: sticky; top: 0; z-index: 1; height: 26px; min-height: 26px; max-height: 26px; font-size: 9px; letter-spacing: .04em; }
+.request-row { font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 11px; cursor: pointer; }
+.request-path, .request-host, .request-status, .method, .duration { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.request-host, .duration { color: var(--muted); font-size: 10px; }
+.request-status { font-size: 11px; }
+.request-row .row-copy { width: 22px; height: 22px; }
+.request-row.failed { background: #241e1e; }
+.request-row.failed:hover { background: #2c2424; }
+.request-row.failed.selected, .request-row.selected { background: var(--selected); }
+.brief-heading h2 { margin: 2px 0 6px; font-size: 16px; }
+#view-brief #preview { flex: 1; min-height: 120px; margin: 0; overflow: auto; white-space: pre-wrap; }
+.view-toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.view-intro { margin: 0; }
+.section-label { margin: 14px 0 8px; font-size: 11px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--dim); }
+.state-list { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.state-row { display: grid; grid-template-columns: minmax(120px, 38%) minmax(0, 1fr); gap: 12px; align-items: center; min-height: 32px; padding: 0 10px; border-bottom: 1px solid var(--border); font: 11px ui-monospace, "SFMono-Regular", Consolas, monospace; }
+.state-row:last-child { border-bottom: 0; }
+.state-row strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 550; }
+.state-row span { color: var(--muted); }
+.handshake { display: block; width: 100%; text-align: left; margin-bottom: 6px; font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: 11px; }
+#socket-summary { padding: 0 0 8px; background: transparent; border: 0; }
+footer.copy-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.footer-actions { display: flex; align-items: center; gap: 8px; flex: none; }
+.copy-brief { display: inline-flex; align-items: center; gap: 6px; background: var(--accent); color: var(--accent-ink); border-color: var(--accent); padding: 6px 10px; }
+.copy-brief:hover:not(:disabled) { background: #fff; color: var(--accent-ink); }
+.copy-brief svg, .copy-brief svg * { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.copy-brief .icon-check { display: none; }
+.copy-brief.is-copied .icon-copy { display: none; }
+.copy-brief.is-copied .icon-check { display: block; }
+.copy-brief.is-copied { background: var(--accent); color: var(--accent-ink); }
+@media (max-width: 760px) {
+  .col-host, .request-host { display: none; }
+  .list-heading, .request-row { grid-template-columns: 42px 52px minmax(0, 1fr) 56px 24px; gap: 6px; }
+  .header-tools .capture-mode { font-size: 10px; }
+}
+@media (max-width: 520px) {
+  .app-header { flex-wrap: wrap; }
+  .duration, .list-heading span:nth-child(5) { display: none; }
+  .list-heading, .request-row { grid-template-columns: 40px 46px minmax(0, 1fr) 24px; }
+}

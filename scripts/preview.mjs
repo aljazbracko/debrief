@@ -55,13 +55,15 @@ try {
   async function screenshot(name) {
     await pause(100);
     const shot = await send('Page.captureScreenshot', { format: 'png' }, session);
-    writeFileSync(join(root, 'docs/images', name + '.png'), Buffer.from(shot.data, 'base64'));
+    const bytes = Buffer.from(shot.data, 'base64');
+    writeFileSync(join(root, 'docs/images', name + '.png'), bytes);
+    writeFileSync(join(root, 'docs/images', name + '-graphite.png'), bytes);
   }
   await screenshot('preview');
-  await evaluate(session, `document.getElementById('tab-context').click()`);
+  await evaluate(session, `document.querySelector('[data-view="brief"]').click()`);
   await screenshot('markdown');
   await send('Emulation.setDeviceMetricsOverride', { width: 680, height: 950, deviceScaleFactor: 1, mobile: false }, session);
-  await evaluate(session, `document.getElementById('tab-response').click()`);
+  await evaluate(session, `document.querySelector('[data-view="requests"]').click();document.getElementById('tab-response').click()`);
   await screenshot('docked');
   assert.equal(await evaluate(session, 'document.documentElement.scrollWidth <= innerWidth'), true);
   const report = buildContext(entries[2], errors);

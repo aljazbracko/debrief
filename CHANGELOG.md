@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.4.0 — 2026-09-23
+
+### Changed
+
+- Replaced the single traffic layout with Brief, Requests, App state and Connections.
+- Request rows are one 34px line: status, method, path, host and duration, so more of the capture stays visible.
+- Brief shows the exact redacted report for the selected request. Copy brief stays in the footer. Each row still copies that request directly.
+- App state and Connections show the existing top-frame auth sample and exposed Pusher summary. Values in App state stay redacted. This is not a full storage browser or a WebSocket frame viewer.
+
 ## 1.3.1 — 2026-09-23
 
 ### Changed

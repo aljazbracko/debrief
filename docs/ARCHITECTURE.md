@@ -21,7 +21,7 @@ flowchart LR
 | `format.js` | Inspection/report sections, fences, limits and omissions |
 | `filters.js` | Type classification, safe labels and filtering |
 | `inspector.js` | Text tables, bounded JSON trees and timing bars |
-| `panel.js` | Selection, rendering, mode toggle and per-copy raw confirmation |
+| `panel.js` | Section navigation, selection, rendering, mode toggle and per-copy raw confirmation |
 
 ## Boundaries
 

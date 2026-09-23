@@ -25,7 +25,7 @@ Debugging with an LLM usually starts with a lot of copying: a URL, headers, payl
 
 Requires **Google Chrome 120+**. Distributed as an unpacked extension, not through the Chrome Web Store.
 
-1. Download `debrief-1.3.1.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
+1. Download `debrief-1.4.0.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
 2. Open `chrome://extensions` and enable **Developer mode**.
 3. Click **Load unpacked** and select the folder containing `manifest.json`.
 4. Open DevTools on a web app: **⌘⌥I** on macOS or **Ctrl+Shift+I** on Windows/Linux.
@@ -47,9 +47,11 @@ HTTP headers and bodies can still contain credentials. Display and normal clipbo
 
 ### Find and inspect
 
+The panel has four sections. **Requests** is the working list. **Brief** is the exact redacted report for the request you selected. **App state** and **Connections** show the optional top-frame sample: matching auth key names, document cookies, and an exposed Pusher summary. With **HTTP only** on, those two sections stay empty.
+
 **Fetch/XHR is the default filter.** Combine type, method, status, host and search. Search supports exclusions: `orders -analytics -poll`. Hosts come from captured traffic, not a permission list. Filters affect visibility, not retention: the newest 150 requests are retained across all types.
 
-Click anywhere on a row to inspect it. Drag the divider to resize the panes; double-click to reset. Pause stops new capture. Clear and navigation discard the previous capture.
+Each request is one line: status, method, path, host and duration. Click the row to inspect it. The host is in the row tooltip when the panel is too narrow to show the column. Arrow keys move between rows. Drag the divider to resize the panes; double-click to reset. Pause stops new capture. Clear and navigation discard the previous capture.
 
 | Inspector tab | Contents |
 | --- | --- |
@@ -58,12 +60,11 @@ Click anywhere on a row to inspect it. Drag the divider to resize the panes; dou
 | Response | Retained body; collapsible Tree/Text views for JSON |
 | Timing | Duration and individual timing bars |
 | Errors | Nearby errors captured with page context enabled |
-| Auth / Pusher | Matching auth storage keys and exposed connection samples |
-| LLM context | Exact redacted Markdown for this request |
+| Auth / Pusher | Matching auth storage keys and exposed connection samples for this request |
 
 ### Copy and paste
 
-The copy icon always copies the complete request report, whichever inspector tab is open. Redaction runs before long sections are shortened. The dashed icon requires a checkbox and confirmation for **one raw copy**; it never disables redaction permanently. If automatic copying is blocked, a selected-text dialog supports **⌘C / Ctrl+C**. Debrief never reads your clipboard.
+The row copy icon and **Copy brief** both copy the complete redacted report for that request. Redaction runs before long sections are shortened. The dashed icon requires a checkbox and confirmation for **one raw copy**; it never disables redaction permanently. If automatic copying is blocked, a selected-text dialog supports **⌘C / Ctrl+C**. Debrief never reads your clipboard.
 
 Read a complete [synthetic Markdown example](docs/EXAMPLE.md). Missing, sampled and omitted evidence is labeled explicitly.
 
@@ -84,7 +85,7 @@ Review output before sharing. Internal hostnames and confidential business infor
 - Latest **150 requests / 100 errors**, plus one retained selection; no disk-backed history.
 - Text capture is bounded at **256 Ki characters**; known response sizes over 256 KiB are skipped. Copied bodies keep at most **12,000 characters**, other sections 6,000, with omission markers. Raw copy has the same size limits.
 - Optional auth/errors are top-frame only. Samples are near completion, not proof of state at request start. Earlier console messages, worker/subframe errors and module-private state are unavailable.
-- Auth matches selected key names; this release is **not a complete local-storage browser**.
+- Auth matches selected key names; this release is **not a complete local-storage browser**. App state shows that same sample, with values redacted.
 - Pusher requires exposed instances: `window.Pusher.instances`, `window.pusher` or `window.Echo.connector.pusher`. No generic WebSocket frames or channel member lists. Use Network → WS for frames.
 - No request replay, automatic diagnosis or hosted AI integration.
 

@@ -1,12 +1,12 @@
 import { buildContext, buildInspection } from './format.js';
-import { createRedactor } from './redact.js';
+import { MASK, createRedactor } from './redact.js';
 import { TYPES, requestType, requestLabel, matchesFilters } from './filters.js';
 import { renderInspection } from './inspector.js';
 
 const $ = id => document.getElementById(id);
 let store, unsubscribe, selectedId = null, rawTarget = null, lastPreview = '', renderQueued = false;
 let manualRaw = false, activeType = 'api', activeTab = 'headers', selectedEntry = null;
-let lastDetailsKey = '', hostKey = '', socketKey = '', viewGeneration;
+let lastDetailsKey = '', hostKey = '', socketKey = '', stateKey = '', handshakeKey = '', viewGeneration;
 const rowCache = new Map();
 const displayRedactor = createRedactor();
 const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -27,10 +27,13 @@ function updatePreview() {
   const entry = entryFor(selectedId);
   $('copy-selected').disabled = !entry;
   $('copy-raw').disabled = !entry;
+  $('count-brief').textContent = entry ? '1' : '0';
   if (!entry) {
     if (selectedId != null) {
       $('preview-title').textContent = 'Capture cleared.';
+      $('inspector-title').textContent = 'Capture cleared.';
       $('preview-meta').textContent = 'Select another request.';
+      $('inspector-meta').textContent = 'Select another request.';
       $('preview').textContent = ''; lastPreview = ''; selectedId = null; selectedEntry = null;
       $('inspector').textContent = 'Select a request to inspect it.'; lastDetailsKey = '';
     }
@@ -47,16 +50,18 @@ function updatePreview() {
   const heading = `${methodName} ${statusCode || 'ERR'}  ${requestLabel(entry).name || ''}`.trim();
   $('preview-title').textContent = heading;
   $('preview-title').title = heading;
+  $('inspector-title').textContent = heading;
+  $('inspector-title').title = heading;
   const retained = store.entries.includes(entry);
-  $('preview-meta').textContent = `${requestType(entry).toUpperCase()} · ${activeTab === 'context' ? text.length.toLocaleString() + ' characters to copy' : 'Redacted inspection · full retained detail'}${retained ? '' : ' · selected request kept open'}${entry.bodyState === 'loading' ? ' · body loading' : ''}`;
-  if (activeTab !== 'context') {
-    try {
-      const sections = buildInspection(entry, store.errors);
-      const titles = { headers: ['Request', 'Request headers', 'Query parameters', 'Response headers'], payload: ['Query parameters', 'Request payload'], response: ['Response body'], errors: ['Nearby console errors'], auth: ['Auth context', 'Pusher / WebSockets'], timing: ['Request'] };
-      const key = entry.id + activeTab + JSON.stringify(sections.filter(s => titles[activeTab].includes(s.title)));
-      if (key !== lastDetailsKey) { renderInspection($('inspector'), entry, sections, activeTab); lastDetailsKey = key; }
-    } catch { $('inspector').textContent = 'Could not inspect this request safely.'; }
-  }
+  const loading = entry.bodyState === 'loading' ? ' · body loading' : '';
+  $('preview-meta').textContent = `${requestType(entry).toUpperCase()} · ${text.length.toLocaleString()} characters · redacted${retained ? '' : ' · selected request kept open'}${loading}`;
+  $('inspector-meta').textContent = `${requestType(entry).toUpperCase()} · redacted inspection${retained ? '' : ' · selected request kept open'}${loading}`;
+  try {
+    const sections = buildInspection(entry, store.errors);
+    const titles = { headers: ['Request', 'Request headers', 'Query parameters', 'Response headers'], payload: ['Query parameters', 'Request payload'], response: ['Response body'], errors: ['Nearby console errors'], auth: ['Auth context', 'Pusher / WebSockets'], timing: ['Request'] };
+    const key = entry.id + activeTab + JSON.stringify(sections.filter(s => titles[activeTab].includes(s.title)));
+    if (key !== lastDetailsKey) { renderInspection($('inspector'), entry, sections, activeTab); lastDetailsKey = key; }
+  } catch { $('inspector').textContent = 'Could not inspect this request safely.'; }
 }
 function select(id) {
   const entry = entryFor(id);
@@ -67,7 +72,7 @@ function select(id) {
   for (const row of $('request-list').children) row.classList.toggle('selected', Number(row.dataset.id) === id);
   updatePreview();
 }
-function writeClipboard(text, raw, id) {
+function writeClipboard(text, raw, id, extra) {
   // Copy synchronously inside the user's click. No clipboardWrite permission.
   // execCommand is deprecated but keeps transient activation across DevTools
   // versions; a visible, selected-text fallback requires no permission either.
@@ -81,7 +86,7 @@ function writeClipboard(text, raw, id) {
   area.value = ''; area.remove(); focused?.focus();
   if (copied) {
     notice(raw ? 'RAW CONTEXT COPIED — clipboard contains unredacted data. Normal copies remain redacted.' : 'Redacted context copied. Paste it into your chat.', raw);
-    markCopied(id, raw);
+    markCopied(id, raw, extra);
     return;
   }
   // No asynchronous retry with a stale raw payload in a Promise closure.
@@ -98,8 +103,9 @@ function copy(id, raw = false) {
   const text = context(entry, raw);
   if (text != null) writeClipboard(text, raw, id);
 }
-function markCopied(id, raw) {
-  const buttons = raw ? [$('copy-raw')] : [$('copy-selected'), rowCache.get(id)?.querySelector('.row-copy')].filter(Boolean);
+function markCopied(id, raw, extra) {
+  const buttons = raw ? [$('copy-raw')] : id == null ? [] : [$('copy-selected'), rowCache.get(id)?.querySelector('.row-copy')].filter(Boolean);
+  if (extra) buttons.push(extra);
   for (const button of buttons) button.classList.add('is-copied');
   clearTimeout(copiedTimer);
   copiedTimer = setTimeout(() => { for (const button of buttons) button.classList.remove('is-copied'); }, 1300);
@@ -121,18 +127,22 @@ function copyGlyphs() {
   return [copy, check];
 }
 function makeRow(entry) {
-  const row = document.createElement('div'); row.className = 'request-row'; row.dataset.id = entry.id;
+  const row = document.createElement('div'); row.className = 'request-row'; row.dataset.id = entry.id; row.tabIndex = 0;
   row.classList.toggle('selected', selectedId === entry.id);
-  const statusBlock = document.createElement('span'); statusBlock.className = 'request-status';
-  const status = document.createElement('span'); status.className = 'status';
-  const code = entry.har.response?.status || 0; status.textContent = code || 'ERR'; status.classList.toggle('failed', code === 0 || code >= 400);
-  const method = document.createElement('span'); method.className = 'method method-' + (entry.har.request?.method || '').toLowerCase(); method.textContent = entry.har.request?.method || '?';
-  statusBlock.append(status, method);
-  const requestButton = document.createElement('button'); requestButton.className = 'request-name';
+  const code = entry.har.response?.status || 0;
+  row.classList.toggle('failed', code === 0 || code >= 400);
   const { name, host } = requestLabel(entry);
-  const nameEl = document.createElement('strong'); nameEl.textContent = name;
-  const hostEl = document.createElement('small'); hostEl.textContent = `${requestType(entry).toUpperCase()} · ${host}`;
-  requestButton.append(nameEl, hostEl); requestButton.setAttribute('aria-label', 'Preview ' + name);
+  const methodName = entry.har.request?.method || '?';
+  const label = `${methodName} ${host}${name}`;
+  row.title = label;
+  row.setAttribute('aria-label', label);
+  const status = document.createElement('span'); status.className = 'request-status';
+  const codeEl = document.createElement('span'); codeEl.className = 'status';
+  codeEl.textContent = code || 'ERR'; codeEl.classList.toggle('failed', code === 0 || code >= 400);
+  status.append(codeEl);
+  const method = document.createElement('span'); method.className = 'method method-' + methodName.toLowerCase(); method.textContent = methodName;
+  const path = document.createElement('span'); path.className = 'request-path'; path.textContent = name || '/';
+  const hostEl = document.createElement('span'); hostEl.className = 'request-host'; hostEl.textContent = host;
   const duration = document.createElement('span'); duration.className = 'duration'; duration.textContent = Math.round(entry.har.time || 0) + ' ms';
   const copyButton = document.createElement('button'); copyButton.className = 'row-copy icon-btn'; copyButton.type = 'button';
   copyButton.append(...copyGlyphs());
@@ -140,15 +150,89 @@ function makeRow(entry) {
   copyButton.setAttribute('aria-label', 'Copy redacted context for ' + name);
   copyButton.addEventListener('click', event => { event.stopPropagation(); copy(entry.id); });
   row.addEventListener('click', () => select(entry.id));
-  row.append(statusBlock, requestButton, duration, copyButton);
+  row.addEventListener('keydown', event => {
+    if (event.target !== row) return;
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(entry.id); }
+  });
+  row.append(status, method, path, hostEl, duration, copyButton);
   return row;
 }
 function filters() {
   return { type: activeType, query: $('search').value, method: $('method-filter').value, status: $('status-filter').value, host: $('host-filter').value };
 }
+function maskedAuth(auth = {}) {
+  return {
+    localStorage: (auth.localStorage || []).map(item => ({ key: displayRedactor.text(item.key), value: MASK })),
+    sessionStorage: (auth.sessionStorage || []).map(item => ({ key: displayRedactor.text(item.key), value: MASK })),
+    cookies: (auth.cookies || []).map(item => ({ name: displayRedactor.text(item.name), value: MASK })),
+    notes: (auth.notes || []).map(note => displayRedactor.text(String(note))),
+  };
+}
+function stateCount() {
+  if (!store?.pageContext || !store.snapshot?.auth) return 0;
+  const auth = store.snapshot.auth;
+  return (auth.localStorage?.length || 0) + (auth.sessionStorage?.length || 0) + (auth.cookies?.length || 0);
+}
+function renderState() {
+  const httpOnly = !store.pageContext;
+  const safe = httpOnly || !store.snapshot?.auth ? null : maskedAuth(store.snapshot.auth);
+  const key = (httpOnly ? 'http' : 'page') + JSON.stringify(safe);
+  $('copy-state').disabled = !safe;
+  if (key === stateKey) return;
+  stateKey = key;
+  const intro = $('state-intro');
+  const body = $('state-body');
+  body.replaceChildren();
+  if (!safe) {
+    intro.textContent = 'HTTP only is on, so storage and cookies are not read. Turn it off in the header to sample matching auth keys in the top frame. That clears the current capture.';
+    return;
+  }
+  intro.textContent = 'Latest top-frame sample of auth, session and token key names, plus document cookies. Values stay redacted. This is not a full storage browser.';
+  const groups = [
+    ['localStorage', safe.localStorage, 'key'],
+    ['sessionStorage', safe.sessionStorage, 'key'],
+    ['cookies', safe.cookies, 'name'],
+  ];
+  for (const [area, items, keyName] of groups) {
+    const heading = document.createElement('h3'); heading.className = 'section-label'; heading.textContent = area;
+    const list = document.createElement('div'); list.className = 'state-list';
+    if (!items.length) {
+      const empty = document.createElement('p'); empty.className = 'muted'; empty.textContent = 'None in this sample.';
+      list.append(empty);
+    }
+    for (const item of items) {
+      const row = document.createElement('div'); row.className = 'state-row';
+      const name = document.createElement('strong'); name.textContent = String(item[keyName] ?? '');
+      const value = document.createElement('span'); value.textContent = MASK;
+      row.append(name, value); list.append(row);
+    }
+    body.append(heading, list);
+  }
+  const noteText = [...safe.notes, store.snapshot.note].filter(Boolean).join(' ');
+  if (noteText) { const note = document.createElement('p'); note.className = 'muted'; note.textContent = displayRedactor.text(noteText); body.append(note); }
+}
+function renderHandshakes() {
+  const sockets = store.entries.filter(entry => requestType(entry) === 'socket').slice().reverse();
+  const key = sockets.map(entry => entry.id).join(',');
+  if (key === handshakeKey) return;
+  handshakeKey = key;
+  const list = $('handshake-list');
+  list.replaceChildren();
+  if (!sockets.length) {
+    const empty = document.createElement('p'); empty.className = 'muted';
+    empty.textContent = 'No socket handshakes in this capture. Frames stay in the browser Network panel.';
+    list.append(empty);
+    return;
+  }
+  for (const entry of sockets) {
+    const { name, host } = requestLabel(entry);
+    const button = document.createElement('button'); button.type = 'button'; button.className = 'handshake';
+    button.textContent = `${entry.har.response?.status || 'ERR'}  ${entry.har.request?.method || '?'}  ${host}${name}`;
+    button.addEventListener('click', () => { setView('requests'); select(entry.id); });
+    list.append(button);
+  }
+}
 function updateSockets() {
-  $('socket-summary').hidden = activeType !== 'socket';
-  if (activeType !== 'socket') return;
   const snapshot = store.snapshot;
   const safe = displayRedactor.value(Array.isArray(snapshot?.pusher) ? snapshot.pusher : []);
   const key = JSON.stringify(safe) + (store.paused ? 'paused' : 'live');
@@ -172,12 +256,16 @@ function updateSockets() {
     block.append(heading, channels); content.append(block);
   }
   $('socket-summary').replaceChildren(title, content, note);
+  const live = safe.some(instance => instance.state === 'connected');
+  $('connection-dot').classList.toggle('live', live);
+  $('connection-dot').title = live ? 'Exposed connection is connected' : safe.length ? 'Exposed connection sampled' : 'No exposed connection';
 }
 function render() {
   renderQueued = false;
   if (!store) return;
   if (viewGeneration !== store.generation) {
     viewGeneration = store.generation; selectedEntry = null;
+    stateKey = ''; handshakeKey = ''; socketKey = '';
     $('raw-dialog').close(); $('clipboard-dialog').close(); $('manual-copy').value = '';
   }
   const currentHost = $('host-filter').value;
@@ -219,7 +307,12 @@ function render() {
   $('pause').textContent = store.paused ? 'Resume' : 'Pause';
   $('pause').setAttribute('aria-pressed', String(store.paused));
   $('http-only').checked = !store.pageContext;
+  $('count-requests').textContent = String(store.entries.length);
+  $('count-brief').textContent = entryFor(selectedId) ? '1' : '0';
+  $('count-state').textContent = String(stateCount());
   updateSockets();
+  renderHandshakes();
+  renderState();
   updatePreview();
 }
 function scheduleRender() {
@@ -250,16 +343,43 @@ function resetFilters() {
 }
 $('reset-filters').addEventListener('click', resetFilters);
 $('show-all').addEventListener('click', resetFilters);
+function setView(view) {
+  for (const id of ['requests', 'brief', 'state', 'connections']) $('view-' + id).hidden = id !== view;
+  for (const button of $('app-nav').children) {
+    const selected = button.dataset.view === view;
+    button.classList.toggle('active', selected);
+    button.setAttribute('aria-pressed', String(selected));
+  }
+}
 function setTab(tab) {
   activeTab = tab;
   for (const button of $('detail-tabs').children) {
     const selected = button.dataset.tab === tab;
     button.setAttribute('aria-selected', String(selected)); button.tabIndex = selected ? 0 : -1;
   }
-  $('preview').hidden = tab !== 'context'; $('inspector').hidden = tab === 'context';
   $('inspector').setAttribute('aria-labelledby', 'tab-' + tab);
   updatePreview();
 }
+$('app-nav').addEventListener('click', event => {
+  const button = event.target.closest('[data-view]');
+  if (button) setView(button.dataset.view);
+});
+$('request-list').addEventListener('keydown', event => {
+  if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
+  const rows = [...$('request-list').children];
+  const index = rows.indexOf(event.target.closest('.request-row'));
+  if (index < 0) return;
+  event.preventDefault();
+  const next = rows[index + (event.key === 'ArrowDown' ? 1 : -1)];
+  if (!next) return;
+  select(Number(next.dataset.id));
+  next.focus();
+});
+$('copy-state').addEventListener('click', () => {
+  if (!store?.pageContext || !store.snapshot?.auth) return;
+  const report = '# App state\n\nLatest top-frame sample. Values redacted. Not a complete storage browser.\n\n' + JSON.stringify(maskedAuth(store.snapshot.auth), null, 2) + '\n';
+  writeClipboard(report, false, null, $('copy-state'));
+});
 $('detail-tabs').addEventListener('click', event => { const tab = event.target.closest('[data-tab]'); if (tab) setTab(tab.dataset.tab); });
 $('detail-tabs').addEventListener('keydown', event => {
   const tabs = [...$('detail-tabs').children], index = tabs.indexOf(document.activeElement);
@@ -293,7 +413,7 @@ $('clipboard-dialog').addEventListener('close', clearManualCopy);
 $('clipboard-dialog').addEventListener('cancel', clearManualCopy);
 $('clipboard-dialog').querySelector('form').addEventListener('submit', clearManualCopy);
 const split = $('split');
-const workbench = document.querySelector('main');
+const workbench = $('workbench');
 function setListHeight(px) {
   const bounds = workbench.getBoundingClientRect();
   const max = Math.max(112, bounds.height - split.offsetHeight - 150);

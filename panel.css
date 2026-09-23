@@ -183,3 +183,98 @@ body.is-resizing, body.is-resizing * { cursor: row-resize; user-select: none; }
 .capture-mode { display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; font-size: 11px; color: var(--muted, #b5c1ae); }
 .capture-mode input { accent-color: #c8eca5; }
 @media (max-width: 480px) { .toolbar { flex-wrap: wrap; } .toolbar .search { flex-basis: 100%; } }
+
+/* Graphite UI: restrained neutrals, white primary actions, and color reserved
+   for errors, focus, and selection. Request data stays monospace; chrome uses
+   the platform UI font so the panel reads like an engineer's workbench. */
+:root {
+  color-scheme: dark;
+  --bg: #18191c;
+  --surface: #1f2024;
+  --surface-raised: #26282d;
+  --surface-inset: #141518;
+  --border: #363940;
+  --border-strong: #555a64;
+  --ink: #eceef2;
+  --muted: #b0b5bf;
+  --dim: #969da8;
+  --accent: #e5e7eb;
+  --accent-ink: #1a1c20;
+  --selected: #2d3138;
+  --danger: #f19a9a;
+  --danger-bg: #302324;
+  --success: #a6bfb2;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+body { background: var(--bg); color: var(--ink); }
+button, input, textarea, select { font-family: inherit; }
+button { border-color: var(--border); }
+button:hover:not(:disabled) { background: var(--surface-raised); border-color: var(--border-strong); }
+button:focus-visible, input:focus-visible, textarea:focus-visible, pre:focus-visible { outline-color: var(--accent); }
+header { background: var(--surface); border-color: var(--border); }
+h1 { font-family: inherit; font-size: 18px; font-weight: 600; letter-spacing: -.4px; }
+.mark, .dot, .type-filters button[aria-pressed=true], .request-row .row-copy { color: var(--muted); }
+.version, header p, .privacy, .capture-line, .muted, .request-name small, .duration { color: var(--muted); }
+.dot, .small-dot, .connection-dot { background: var(--success); }
+.divider { color: var(--border); }
+.search { background: var(--surface-inset); border-color: var(--border); }
+.search:focus-within { border-color: var(--border-strong); }
+.filter-bar, main, footer { border-color: var(--border); }
+.filter-bar, .capture-line, .list-heading { background: var(--surface); }
+select { background: var(--surface); color: var(--ink); border-color: var(--border); }
+.type-filters button[aria-pressed=true] { background: var(--surface-raised); border-color: var(--border-strong); }
+.requests { border-color: var(--border); }
+.list-heading { color: var(--dim); }
+.request-row { background: var(--surface); border-color: var(--border); }
+.request-row:hover { background: var(--surface-raised); }
+.request-row.selected { background: var(--selected); box-shadow: inset 3px 0 var(--accent); }
+.request-status .status { color: var(--ink); }
+.request-row.failed .status { color: var(--danger); }
+.method { color: var(--muted); }
+.method-post, .method-put, .method-patch { color: var(--muted); }
+.method-delete { color: var(--danger); }
+.request-name strong { font-weight: 550; }
+.request-row .row-copy:hover:not(:disabled) { color: var(--ink); background: var(--surface-raised); border-color: var(--border-strong); }
+.request-row .row-copy.is-copied, .icon-btn.primary.is-copied, .icon-btn.raw.is-copied { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.request-row .row-copy { color: var(--muted); }
+.capture-mode { color: var(--muted); }
+.capture-mode input, input[type=checkbox] { accent-color: var(--accent); }
+.capture-line { color: var(--muted); }
+.capture-strip, .capture-line { background: var(--surface); border-color: var(--border); }
+.capture-strip strong, .capture-strip #capture-window, .capture-strip button { color: var(--muted); }
+.capture-strip.is-recording { background: #302c25; }
+.split::before { background: var(--border); }
+.split::after { background: var(--border-strong); }
+.split:hover::after, .split:focus-visible::after, body.is-resizing .split::after { background: var(--accent); }
+aside { background: var(--surface); }
+.preview-heading h2, h2 { color: var(--ink); }
+.eyebrow { color: var(--dim); }
+.badge { color: var(--muted); border-color: var(--border-strong); }
+.preview-actions .primary, .icon-btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.preview-actions .primary:hover:not(:disabled), .icon-btn.primary:hover:not(:disabled) { background: #fff; color: var(--accent-ink); }
+.raw, .icon-btn.raw { color: var(--danger); border-color: #65464b; }
+.raw:hover:not(:disabled), .icon-btn.raw:hover:not(:disabled) { background: var(--danger-bg); color: var(--danger); }
+.detail-tabs { border-color: var(--border); }
+.detail-tabs button { color: var(--muted); }
+.detail-tabs button[aria-selected=true] { color: var(--ink); border-bottom-color: var(--accent); background: var(--surface-raised); }
+#inspector, #preview, pre { background: var(--surface-inset); border-color: var(--border); color: #d9dee8; }
+.inspector-empty, .detail-section h3, .key-values th, .timing-row, .socket-instance ul { color: var(--muted); }
+.key-values td, .timing-row span:last-child { color: var(--ink); }
+.detail-code, .json-tree, .detail-code pre { color: #d9dee8; }
+.body-controls button[aria-pressed=true] { color: var(--ink); border-color: var(--border-strong); background: var(--surface-raised); }
+.json-node summary, .json-key { color: var(--muted); }
+.json-value { color: #d9dee8; }
+.timing-row { border-color: var(--border); }
+.timing-row meter::-webkit-meter-bar { background: var(--surface-raised); }
+.timing-row meter::-webkit-meter-optimum-value { background: var(--muted); }
+.socket-summary { background: var(--surface-raised); border-color: var(--border-strong); }
+.socket-summary h3 { color: var(--ink); }
+footer { background: var(--surface); color: var(--muted); }
+footer.raw-used { background: var(--danger-bg); color: var(--danger); }
+.footer-label { color: var(--dim); }
+dialog { background: var(--surface); border-color: var(--border-strong); }
+dialog::backdrop { background: #101216cc; }
+dialog p { color: var(--muted); }
+textarea { background: var(--surface-inset); color: var(--ink); border-color: var(--border); }
+.danger { color: var(--danger); }
+.danger-button { background: var(--danger-bg); border-color: #65464b; color: var(--danger); }

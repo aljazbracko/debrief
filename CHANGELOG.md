@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.3.1 — 2026-09-23
+
+### Changed
+
+- Applied the Graphite visual system: neutral charcoal surfaces, restrained borders, platform UI typography, white primary actions, and color reserved for focus, selection, errors and connection state.
+- Preserved compact request rows, filters, inspector behavior, redaction controls and the HTTP-only default.
+
 ## 1.3.0 — 2026-09-23
 
 First public release.

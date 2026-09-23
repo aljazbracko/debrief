@@ -1,7 +1,7 @@
 <p align="center"><img src="icons/icon128.png" alt="" width="64" height="64"></p>
 <h1 align="center">Debrief</h1>
 <p align="center"><strong>One request. The whole story.</strong><br>A local Chrome DevTools panel that turns browser evidence into a pasteable debugging brief.</p>
-<p align="center">Manifest V3 · Vanilla JavaScript · No dependencies · No requested permissions</p>
+<p align="center">Manifest V3 · Vanilla JavaScript · No dependencies · No requested permissions · Graphite UI</p>
 <p align="center"><a href="#install">Install</a> · <a href="#use">Use</a> · <a href="SECURITY.md">Security</a> · <a href="PRIVACY.md">Privacy</a> · <a href="CONTRIBUTING.md">Contribute</a></p>
 
 ![Debrief showing synthetic API requests and a redacted response](docs/images/preview.png)
@@ -25,7 +25,7 @@ Debugging with an LLM usually starts with a lot of copying: a URL, headers, payl
 
 Requires **Google Chrome 120+**. Distributed as an unpacked extension, not through the Chrome Web Store.
 
-1. Download `debrief-1.3.0.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
+1. Download `debrief-1.3.1.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
 2. Open `chrome://extensions` and enable **Developer mode**.
 3. Click **Load unpacked** and select the folder containing `manifest.json`.
 4. Open DevTools on a web app: **⌘⌥I** on macOS or **Ctrl+Shift+I** on Windows/Linux.

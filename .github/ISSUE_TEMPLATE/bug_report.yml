@@ -1,0 +1,40 @@
+name: Bug report
+description: Report a reproducible problem with synthetic evidence.
+body:
+  - type: markdown
+    attributes:
+      value: Do not attach real requests, credentials, HAR files or private screenshots. Report vulnerabilities using the Security tab instead.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Include what you expected and what actually happened.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Use an invented example or a minimal public reproduction.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Chrome and Debrief versions
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Capture mode
+      options:
+        - HTTP only
+        - Page context enabled
+  - type: checkboxes
+    id: privacy
+    attributes:
+      label: Before submitting
+      options:
+        - label: My report contains no real credentials, personal data or internal company information.
+          required: true

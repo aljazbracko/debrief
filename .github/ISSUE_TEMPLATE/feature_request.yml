@@ -1,0 +1,15 @@
+name: Feature request
+description: Describe a debugging task Debrief could handle better.
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: What are you trying to debug?
+      description: Describe the task and what currently gets in the way. Use fictional examples.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested behavior
+      description: Include any impact on permissions, redaction, outbound traffic or data retention.

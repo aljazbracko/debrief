@@ -6,7 +6,7 @@
 
 ![Debrief showing synthetic API requests and a redacted response](docs/images/preview-graphite.png)
 
-*The real extension UI, populated with fictional `example.test` requests. No customer or production captures are used.*
+*Demo preview.*
 
 <details>
 <summary>More previews: Markdown output and docked DevTools</summary>

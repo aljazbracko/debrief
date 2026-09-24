@@ -25,7 +25,7 @@ Debugging with an LLM usually starts with a lot of copying: a URL, headers, payl
 
 Requires **Google Chrome 120+**. Distributed as an unpacked extension, not through the Chrome Web Store.
 
-1. Download `debrief-1.4.0.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
+1. Download `debrief-1.4.1.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
 2. Open `chrome://extensions` and enable **Developer mode**.
 3. Click **Load unpacked** and select the folder containing `manifest.json`.
 4. Open DevTools on a web app: **⌘⌥I** on macOS or **Ctrl+Shift+I** on Windows/Linux.

@@ -168,6 +168,9 @@ function maskedAuth(auth = {}) {
     notes: (auth.notes || []).map(note => displayRedactor.text(String(note))),
   };
 }
+function rawAuthReport(auth = {}) {
+  return '# App state\n\n**RAW COPY — includes credentials and personal data.**\n\nLatest top-frame sample. This is not a complete storage browser.\n\n' + JSON.stringify(auth, null, 2) + '\n';
+}
 function stateCount() {
   if (!store?.pageContext || !store.snapshot?.auth) return 0;
   const auth = store.snapshot.auth;
@@ -178,6 +181,7 @@ function renderState() {
   const safe = httpOnly || !store.snapshot?.auth ? null : maskedAuth(store.snapshot.auth);
   const key = (httpOnly ? 'http' : 'page') + JSON.stringify(safe);
   $('copy-state').disabled = !safe;
+  $('copy-state-raw').disabled = !safe;
   if (key === stateKey) return;
   stateKey = key;
   const intro = $('state-intro');
@@ -380,6 +384,13 @@ $('copy-state').addEventListener('click', () => {
   const report = '# App state\n\nLatest top-frame sample. Values redacted. Not a complete storage browser.\n\n' + JSON.stringify(maskedAuth(store.snapshot.auth), null, 2) + '\n';
   writeClipboard(report, false, null, $('copy-state'));
 });
+$('copy-state-raw').addEventListener('click', () => {
+  if (!store?.pageContext || !store.snapshot?.auth) return;
+  rawTarget = 'state';
+  $('raw-ack').checked = false;
+  $('raw-confirm').disabled = true;
+  $('raw-dialog').showModal();
+});
 $('detail-tabs').addEventListener('click', event => { const tab = event.target.closest('[data-tab]'); if (tab) setTab(tab.dataset.tab); });
 $('detail-tabs').addEventListener('keydown', event => {
   const tabs = [...$('detail-tabs').children], index = tabs.indexOf(document.activeElement);
@@ -401,7 +412,10 @@ $('raw-ack').addEventListener('change', () => { $('raw-confirm').disabled = !$('
 $('raw-confirm').addEventListener('click', () => {
   if (!$('raw-ack').checked) return;
   const target = rawTarget;
-  $('raw-dialog').close(); copy(target, true);
+  $('raw-dialog').close();
+  if (target === 'state') {
+    if (store?.pageContext && store.snapshot?.auth) writeClipboard(rawAuthReport(store.snapshot.auth), true, null, $('copy-state-raw'));
+  } else copy(target, true);
 });
 $('raw-dialog').addEventListener('close', () => { rawTarget = null; $('raw-ack').checked = false; $('raw-confirm').disabled = true; });
 function clearManualCopy() {
@@ -425,7 +439,7 @@ function setListHeight(px) {
 split.addEventListener('pointerdown', event => {
   if (event.button !== 0) return;
   event.preventDefault();
-  split.setPointerCapture(event.pointerId);
+  try { split.setPointerCapture(event.pointerId); } catch { /* Capture can fail outside a real pointer; the move listeners still track the drag. */ }
   document.body.classList.add('is-resizing');
   const top = workbench.getBoundingClientRect().top;
   const move = ev => setListHeight(ev.clientY - top);

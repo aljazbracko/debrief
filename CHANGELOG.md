@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1 — 2026-09-23
+
+### Fixed
+
+- The divider between the request list and the inspector can be dragged downward again. The list keeps the height you set instead of collapsing under the inspector.
+
 ## 1.4.0 — 2026-09-23
 
 ### Changed

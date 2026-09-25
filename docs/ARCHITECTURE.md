@@ -25,7 +25,7 @@ flowchart LR
 
 ## Boundaries
 
-HTTP-only mode avoids the optional page probe entirely. Page-context mode samples every second and temporarily wraps `console.error`, forwarding the existing behavior. It is not isolated from page-modified JavaScript. Probe output is data, never a new code expression. Generation checks discard callbacks from old captures; a separate probe epoch rejects late samples after a mode change or pause.
+Page context is enabled by default when Debrief is first selected. Starting in HTTP-only mode avoids the page probe entirely; switching into it detaches an existing probe and stops further sampling. Page-context mode samples every second and temporarily wraps `console.error`, forwarding the existing behavior. It is not isolated from page-modified JavaScript. Probe output is data, never a new code expression. Generation checks discard callbacks from old captures; a separate probe epoch rejects late samples after a mode change or pause.
 
 Raw values must remain available in memory for the explicit raw-copy path. Normal display and copying share redaction; output truncation happens afterward. Filters do not reduce capture, and the selected request can outlive the rolling buffer until Clear/navigation/mode change.
 

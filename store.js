@@ -3,7 +3,7 @@ import { probeExpression } from './probe.js';
 
 // All retained request data lives in this DevTools page's memory. No worker,
 // storage API, content script, message port, or external recipient exists.
-export function createStore(api, { pageContextEnabled = false } = {}) {
+export function createStore(api, { pageContextEnabled = true } = {}) {
   const entries = [], errors = [], subscribers = new Set();
   const key = [...crypto.getRandomValues(new Uint8Array(16))].map(n => n.toString(16).padStart(2, '0')).join('');
   let nextId = 0, generation = 0, paused = false, snapshot = null, polling = false, closed = false, captureSince = 0;

@@ -19,7 +19,7 @@ CHROME_BINARY='/path/to/chrome' node scripts/preview.mjs
 
 Use a Chrome binary that supports `--load-extension` (such as Chrome for Testing); branded Chrome builds may reject command-line extension loading. The scripts use a fresh temporary profile and a mock keychain. They never attach to your normal browser profile or copy to your real clipboard. The smoke test serves only a synthetic loopback app. Preview fixtures are invented `example.test` data and use the shipped UI. Generated browser profiles are removed at exit; no real site should be inspected during these checks.
 
-Also load unpacked manually in the minimum supported Chrome version before claiming a newly tested version floor. Verify first-open capture, HTTP-only default, opt-in page context, pause/resume, clear/navigation, keyboard access, raw confirmation and safe-copy restoration. Automated tests do not cover every Chrome/OS combination.
+Also load unpacked manually in the minimum supported Chrome version before claiming a newly tested version floor. Verify first-open capture with page context enabled, HTTP-only opt-out, pause/resume, clear/navigation, keyboard access, raw confirmation and safe-copy restoration. Automated tests do not cover every Chrome/OS combination.
 
 ## Release checklist
 

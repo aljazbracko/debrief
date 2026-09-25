@@ -188,7 +188,9 @@ function renderState() {
   const body = $('state-body');
   body.replaceChildren();
   if (!safe) {
-    intro.textContent = 'HTTP only is on, so storage and cookies are not read. Turn it off in the header to sample matching auth keys in the top frame. That clears the current capture.';
+    intro.textContent = httpOnly
+      ? 'HTTP only is on, so storage and cookies are not read. Turn it off in the header to sample matching auth keys in the top frame. That clears the current capture.'
+      : 'No app state sample is available yet. The inspected page may still be loading, paused or inaccessible.';
     return;
   }
   intro.textContent = 'Latest top-frame sample of auth, session and token key names, plus document cookies. Values stay redacted. This is not a full storage browser.';

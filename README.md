@@ -25,7 +25,7 @@ Debugging with an LLM usually starts with a lot of copying: a URL, headers, payl
 
 Requires **Google Chrome 120+**. Distributed as an unpacked extension, not through the Chrome Web Store.
 
-1. Download `debrief-1.4.1.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
+1. Download `debrief-1.4.2.zip` from [Releases](https://github.com/aljazbracko/debrief/releases/latest) and extract it, or clone/download this repository.
 2. Open `chrome://extensions` and enable **Developer mode**.
 3. Click **Load unpacked** and select the folder containing `manifest.json`.
 4. Open DevTools on a web app: **⌘⌥I** on macOS or **Ctrl+Shift+I** on Windows/Linux.
@@ -41,13 +41,13 @@ No package install, build or `dist` folder is needed. Close and reopen DevTools 
 
 Capture begins when you first open Debrief, not merely when another DevTools panel opens. It continues if you switch panels. Closing DevTools ends the session.
 
-**HTTP only is on by default.** It records network evidence without evaluating code in the inspected page. To include auth storage, new console/runtime errors and exposed Pusher state, turn **HTTP only** off. Changing mode clears existing capture; reproduce afterward. The choice lasts for the current DevTools session and remains active across navigation in that tab.
+**HTTP only is off by default.** Opening Debrief starts network capture and samples auth storage, new console/runtime errors and exposed Pusher state in the inspected page. Turn **HTTP only** on to capture network evidence without further page sampling. Changing mode clears existing capture and detaches or attaches the page probe; reproduce afterward. The choice lasts for the current DevTools session and remains active across navigation in that tab. A new DevTools session starts with page context enabled again.
 
 HTTP headers and bodies can still contain credentials. Display and normal clipboard output are redacted; raw values exist temporarily in memory.
 
 ### Find and inspect
 
-The panel has four sections. **Requests** is the working list. **Brief** is the exact redacted report for the request you selected. **App state** and **Connections** show the optional top-frame sample: matching auth key names, document cookies, and an exposed Pusher summary. With **HTTP only** on, those two sections stay empty.
+The panel has four sections. **Requests** is the working list. **Brief** is the exact redacted report for the request you selected. **App state** and **Connections** show the top-frame sample, enabled by default: matching auth key names, document cookies, and an exposed Pusher summary. With **HTTP only** on, page samples are unavailable; captured socket handshakes can still appear in Connections.
 
 **Fetch/XHR is the default filter.** Combine type, method, status, host and search. Search supports exclusions: `orders -analytics -poll`. Hosts come from captured traffic, not a permission list. Filters affect visibility, not retention: the newest 150 requests are retained across all types.
 
@@ -70,7 +70,7 @@ Read a complete [synthetic Markdown example](docs/EXAMPLE.md). Missing, sampled 
 
 ## Security and privacy
 
-The manifest requests no permissions and declares no host permissions, content scripts, service worker or external messaging endpoint. Runtime code makes no outbound calls and does not persist captured data; restrictive extension CSP blocks connections and remote resources. Captured content is rendered as text. Optional page context uses a fixed probe in the inspected page's main JavaScript world, which is page-controlled and outside extension CSP. **This does not guarantee isolation from hostile pages or complete removal of secrets.** Redaction is heuristic, and clipboard history is outside the extension's control.
+The manifest requests no permissions and declares no host permissions, content scripts, service worker or external messaging endpoint. Runtime code makes no outbound calls and does not persist captured data; restrictive extension CSP blocks connections and remote resources. Captured content is rendered as text. Page context, enabled by default after opening Debrief, uses a fixed probe in the inspected page's main JavaScript world, which is page-controlled and outside extension CSP. **This does not guarantee isolation from hostile pages or complete removal of secrets.** Redaction is heuristic, and clipboard history is outside the extension's control.
 
 - [Security policy and threat boundaries](SECURITY.md)
 - [Privacy and data lifecycle](PRIVACY.md)
@@ -84,7 +84,7 @@ Review output before sharing. Internal hostnames and confidential business infor
 - Completed requests only; pending streams may be absent. Earlier response bodies may be unavailable.
 - Latest **150 requests / 100 errors**, plus one retained selection; no disk-backed history.
 - Text capture is bounded at **256 Ki characters**; known response sizes over 256 KiB are skipped. Copied bodies keep at most **12,000 characters**, other sections 6,000, with omission markers. Raw copy has the same size limits.
-- Optional auth/errors are top-frame only. Samples are near completion, not proof of state at request start. Earlier console messages, worker/subframe errors and module-private state are unavailable.
+- Auth/errors are top-frame only and can be disabled with HTTP only. Samples are near completion, not proof of state at request start. Earlier console messages, worker/subframe errors and module-private state are unavailable.
 - Auth matches selected key names; this release is **not a complete local-storage browser**. App state shows that same sample, with values redacted.
 - Pusher requires exposed instances: `window.Pusher.instances`, `window.pusher` or `window.Echo.connector.pusher`. No generic WebSocket frames or channel member lists. Use Network → WS for frames.
 - No request replay, automatic diagnosis or hosted AI integration.

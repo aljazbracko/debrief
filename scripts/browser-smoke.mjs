@@ -47,14 +47,18 @@ try {
     if (await evaluate(session, `Boolean(window.contextStore?.entries.some(e => e.har.request.url.startsWith(${JSON.stringify(origin)}) && e.har.request.url.includes('/api/order')))`)) { panel = session; break; }
   }
   assert.ok(panel, 'No captured synthetic request');
-  assert.equal(await evaluate(panel, `contextStore.pageContext`), false);
-  assert.equal(await evaluate(app, hasProbe), false, 'HTTP-only must never attach the probe');
-  await evaluate(panel, `document.getElementById('http-only').click()`);
+  assert.equal(await evaluate(panel, `contextStore.pageContext`), true);
+  assert.equal(await evaluate(panel, `document.getElementById('http-only').checked`), false);
+  assert.equal(await evaluate(app, hasProbe), true, 'Selecting Debrief must enable the probe by default');
+  await evaluate(panel, `document.getElementById('clear').click()`);
   assert.equal(await evaluate(panel, `contextStore.entries.length`), 0);
   await evaluate(app, `localStorage.setItem('auth_token','demo-storage-secret');window.pusher={connection:{state:'connected'},channels:{channels:{'private-orders':{subscribed:true}}}}`);
   await pause(1100);
   await evaluate(app, request + `.then(() => console.error('Order failed: demo-request-secret'))`);
   await pause(1100);
+  assert.ok(Number(await evaluate(panel, `document.getElementById('count-state').textContent`)) > 0, 'App state populates without changing capture mode');
+  assert.equal(await evaluate(panel, `document.getElementById('copy-state').disabled`), false);
+  assert.equal(await evaluate(panel, `document.getElementById('copy-state-raw').disabled`), false);
   const id = await evaluate(panel, `contextStore.entries.find(e=>e.har.request.url.includes('/api/order')).id`);
   await evaluate(panel, `document.querySelector('[data-id="${id}"] .request-status').click()`);
   const preview = await evaluate(panel, `document.getElementById('preview').textContent`);
@@ -75,12 +79,13 @@ try {
   assert.equal(egress, 0, 'Extension CSP must block the attempted test connection');
   await evaluate(panel, `document.getElementById('http-only').click()`);
   await pause(100);
+  assert.equal(await evaluate(panel, 'contextStore.pageContext'), false);
   assert.equal(await evaluate(app, hasProbe), false);
   assert.equal(await evaluate(panel, 'contextStore.entries.length'), 0);
   assert.equal(await evaluate(panel, 'document.getElementById("copy-selected").disabled'), true);
   await evaluate(app, request); await pause(300);
   assert.equal(await evaluate(panel, 'contextStore.entries.at(-1).snapshot'), null);
-  console.log('PASS: real extension loading, HTTP-only default, opt-in probe, capture, redaction, inspector, safe/raw copy, mode cleanup and CSP. Clipboard preserved.');
+  console.log('PASS: real extension loading, default page context, app state, HTTP-only opt-out, capture, redaction, inspector, safe/raw copy, mode cleanup and CSP. Clipboard preserved.');
 } finally {
   if (chrome) await chrome.close();
   await new Promise(resolve => server.close(resolve));

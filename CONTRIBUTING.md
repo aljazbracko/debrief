@@ -11,7 +11,7 @@ node --experimental-default-type=module --test tests/*.test.js
 node scripts/check-release.mjs
 ```
 
-Reload the extension in `chrome://extensions` after a runtime change, then close and reopen DevTools. Capture begins when Debrief is first selected. HTTP-only mode is the default; turn it off to test the page probe with synthetic data.
+Reload the extension in `chrome://extensions` after a runtime change, then close and reopen DevTools. Capture and the page probe start when Debrief is first selected. Use synthetic data and test HTTP-only mode as well; it stops page sampling and clears the capture.
 
 ## Changes worth proposing
 

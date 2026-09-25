@@ -9,7 +9,7 @@ const event = () => {
   const listeners = new Set();
   return { addListener: f => listeners.add(f), removeListener: f => listeners.delete(f), emit: value => { for (const f of listeners) f(value); } };
 };
-function harness({ deferredHAR = false, pageContextEnabled = true } = {}) {
+function harness({ deferredHAR = false, pageContextEnabled } = {}) {
   let harCallback;
   const api = { network: { onRequestFinished: event(), onNavigated: event(), getHAR: cb => { harCallback = cb; if (!deferredHAR) cb({ entries: [] }); } },
     inspectedWindow: { eval: (expression, cb) => cb(expression.endsWith(',"stop")') ? null : { time: Date.now(), url: 'https://app.test', auth: { localStorage: [], sessionStorage: [], cookies: [] }, errors: [], pusher: [] }) } };
@@ -22,8 +22,9 @@ function request(overrides = {}) {
     response: { status: 200, headers: [], content: { mimeType: 'application/json', size: 10 } },
     getContent: cb => cb('{"ok":true}', ''), ...overrides };
 }
-test('live response body and nearby snapshot are captured', t => {
+test('page context is enabled by default and live requests include a nearby snapshot', t => {
   const h = harness(); t.after(() => h.store.close());
+  assert.equal(h.store.pageContext, true);
   h.api.network.onRequestFinished.emit(request());
   assert.equal(h.store.entries[0].body, '{"ok":true}');
   assert.equal(h.store.entries[0].snapshot.url, 'https://app.test');
@@ -81,11 +82,11 @@ test('missing page access still captures HTTP', t => {
   h.store.clear(); h.api.network.onRequestFinished.emit(request());
   assert.equal(h.store.entries[0].bodyState, 'ready'); assert.equal(h.store.entries[0].snapshot, null);
 });
-test('HTTP-only default never evaluates page code, including clear, pause and close', () => {
+test('explicit HTTP-only mode never evaluates page code, including clear, pause and close', () => {
   let evaluations = 0;
   const api = { network: { onRequestFinished: event(), onNavigated: event(), getHAR: cb => cb({ entries: [] }) },
     inspectedWindow: { eval: () => { evaluations++; } } };
-  const store = createStore(api);
+  const store = createStore(api, { pageContextEnabled: false });
   assert.equal(store.pageContext, false);
   api.network.onRequestFinished.emit(request());
   assert.equal(store.entries.length, 1); assert.equal(store.entries[0].snapshot, null);

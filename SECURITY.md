@@ -8,7 +8,7 @@ Only the latest published release receives security fixes. This personal project
 
 ## What the supplied extension enforces
 
-- Capture starts on first selection of Debrief. HTTP-only mode is the default and never evaluates page code. Turning it off explicitly enables page context for the current DevTools session. Mode changes clear retained data and invalidate outstanding samples. HTTP-only headers/bodies can still contain secrets.
+- Capture starts on first selection of Debrief, with page context enabled by default. The probe samples top-frame auth storage, document cookies, errors and exposed Pusher state. HTTP-only mode is an opt-out: enabling it detaches the probe and stops further sampling; starting capture in HTTP-only mode never evaluates page code. Mode changes clear retained data and invalidate outstanding samples. HTTP-only headers/bodies can still contain secrets.
 - `permissions: []`; no host/optional permissions, background service worker, content script, web-accessible resource, or external messaging listener.
 - Extension pages use `default-src 'none'` with only packaged scripts/styles allowed. Explicit `connect-src`, image, font, media, frame, object and worker directives deny those network/resource channels. `form-action 'none'` blocks form submission and `base-uri 'none'` blocks base URL substitution. There are no anchors, remote CSS URLs, navigation setters, resource URLs derived from captured data, or HTML injection sinks. HTML dialogs use `method="dialog"`, not navigation.
 - All runtime imports are static local modules. No fetch, XHR, beacon, socket creation, analytics, reporting, external scripts, npm package or bundler exists. Reading HAR content does not replay the request.

@@ -27,7 +27,7 @@ with ZipFile(archive, 'w', compression=ZIP_DEFLATED, compresslevel=9) as package
         package.writestr(info, source.read_bytes())
     info = ZipInfo('INSTALL.txt', (2026, 1, 1, 0, 0, 0))
     info.external_attr = 0o100644 << 16
-    package.writestr(info, 'Extract this archive. Open chrome://extensions, enable Developer mode, choose Load unpacked and select this folder. Open DevTools and select Debrief. HTTP-only is the default. Turn it off to enable optional page context; this clears capture. See SECURITY.md, PRIVACY.md and CAPTURE.md for limitations. Full docs: https://github.com/aljazbracko/debrief\n')
+    package.writestr(info, 'Extract this archive. Open chrome://extensions, enable Developer mode, choose Load unpacked and select this folder. Open DevTools and select Debrief. HTTP only is off by default: network and page context capture start together. Turn HTTP only on to stop page sampling; changing mode clears capture. See SECURITY.md, PRIVACY.md and CAPTURE.md for limitations. Full docs: https://github.com/aljazbracko/debrief\n')
 digest = hashlib.sha256(archive.read_bytes()).hexdigest()
 (output / f'{archive.name}.sha256').write_text(f'{digest}  {archive.name}\n')
 print(f'Packaged {archive.name}: {len(files) + 1} allowlisted entries, SHA-256 {digest}')

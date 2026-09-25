@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.4.2 — 2026-09-25
+
+### Changed
+
+- HTTP only now starts unchecked. Selecting Debrief enables page context by default, including matching auth storage, document cookies, new top-frame errors and exposed Pusher state. HTTP-only remains available to stop page sampling. Redaction and per-copy raw confirmation remain enabled.
+- Updated capture, privacy, security and installation documentation to describe the new default.
+
+### Fixed
+
+- App state no longer reports that HTTP only is on when page context is enabled but a sample is not yet available.
+
 ## 1.4.1 — 2026-09-23
 
 ### Fixed

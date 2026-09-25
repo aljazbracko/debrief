@@ -4,9 +4,9 @@ Debrief has no account, backend, analytics, telemetry, crash reporting, remote f
 
 ## What is processed
 
-After you first open the Debrief panel, it receives completed requests and available bodies from the inspected tab's DevTools network log. Historical HAR metadata may also be available. **HTTP-only is the default** and does not evaluate code in the inspected page. HTTP headers and bodies can still contain credentials and personal data.
+After you first open the Debrief panel, it receives completed requests and available bodies from the inspected tab's DevTools network log. Historical HAR metadata may also be available. **Page context is enabled by default (HTTP only is off).** HTTP headers and bodies can contain credentials and personal data.
 
-Turning HTTP-only off enables a page probe that samples matching authentication storage keys, JavaScript-readable cookies, new top-frame errors and exposed Pusher instances. The probe operates in page-controlled JavaScript; see [SECURITY.md](SECURITY.md). This choice lasts for the current DevTools session. Capture continues while another DevTools panel is selected, until paused or DevTools closes. Navigating clears the previous capture; the selected capture mode remains active for the next page in that tab.
+Opening Debrief also starts a page probe that samples matching authentication storage keys, JavaScript-readable cookies, new top-frame errors and exposed Pusher instances. The probe operates in page-controlled JavaScript; see [SECURITY.md](SECURITY.md). Turn HTTP only on to stop page sampling and clear retained data. This choice lasts for the current DevTools session; a new session enables page context again. Capture continues while another DevTools panel is selected, until paused or DevTools closes. Navigating clears the previous capture; the selected capture mode remains active for the next page in that tab.
 
 Each DevTools window has its own capture. The extension does not enumerate or collect from unrelated tabs.
 
